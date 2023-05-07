@@ -1,8 +1,13 @@
 const { validationResult } = require("express-validator");
+// This library helps us with hashing passwords. We don't want passwords to be plain text.
+const { bcrypt } = require("bcryptjs");
+// This library helps us with creating token
+const jwt = require("jsonwebtoken");
 
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 
+//////////////////////////////////////////////////////////
 const getUsers = async (req, res, next) => {
   let users;
   try {
@@ -16,6 +21,8 @@ const getUsers = async (req, res, next) => {
   }
   res.json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
+
+//////////////////////////////////////////////////////////
 
 const signup = async (req, res, next) => {
   const errors = validationResult(req);
@@ -44,12 +51,24 @@ const signup = async (req, res, next) => {
     );
     return next(error);
   }
+  // Let's hash our password
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    const error = new HttpError(
+      "Could not create user, please try again.",
+      500
+    );
+    return next(error);
+  }
+  // Let's hash our password
 
   const createdUser = new User({
     name,
     email,
     image: "https://live.staticflickr.com/7631/26849088292_36fc52ee90_b.jpg",
-    password,
+    password: hashedPassword,
     places: [],
     courses: [],
   });
@@ -60,13 +79,31 @@ const signup = async (req, res, next) => {
     const error = new HttpError("Signing up failed, please try again.", 500);
     return next(error);
   }
-
-  res.status(201).json({ user: createdUser.toObject({ getters: true }) });
+  // I think we don't need to creat a token in sign up because in front end immediatly after sign up , we do log in and after logging in the token will be created. I don't actually use this sign up token now (actually I don't use sign up response at all)
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: createdUser.id, email: createdUser.email },
+      "supersecret_dont_share",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      "Signing up failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+  /////////////
+  res
+    .status(201)
+    .json({ userId: createdUser.id, email: createdUser.email, token: token });
 };
+
+//////////////////////////////////////////////////////////
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-
   let existingUser;
 
   try {
@@ -79,7 +116,7 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  if (!existingUser || existingUser.password !== password) {
+  if (!existingUser) {
     const error = new HttpError(
       "Invalid credentials, could not log you in.",
       401
@@ -87,9 +124,44 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
+  let isValidPassword = false;
+  try {
+    isValidPassword = await bcrypt.compare(password, existingUser.password);
+  } catch (err) {
+    const error = new HttpError(
+      "Could not log you in, please check your credentials and try again.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!isValidPassword) {
+    const error = new HttpError(
+      "Invalid credentials, could not log you in.",
+      403
+    );
+    return next(error);
+  }
+
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: existingUser.id, email: existingUser.email },
+      "supersecret_dont_share",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      "Logging in failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+
   res.json({
-    message: "Logged in!",
-    user: existingUser.toObject({ getters: true }),
+    userId: existingUser.id,
+    email: existingUser.email,
+    token: token,
   });
 };
 

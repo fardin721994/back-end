@@ -63,9 +63,15 @@ const getCoursesByUserId = async (req, res, next) => {
   });
 };
 const getAllCourses = async (req, res, next) => {};
-const upload = async (req, res, next) => {
+const sectionFileUpload = async (req, res, next) => {
   res.status(200).json({ message: " course." });
 };
+//////////////////////////////////
+const createCourseProfile = async (req, res, next) => {
+  res.status(201).json({ status: "Successfully saved course profile." });
+  // next();
+};
+/////////////////////////////////////
 const words = async (req, res, next) => {
   // res.status(201).json({ course: "hellooooo" });
   const { name, content } = req.body;
@@ -225,4 +231,5 @@ exports.getAllCourses = getAllCourses;
 exports.words = words;
 exports.updateCourse = updateCourse;
 exports.deleteCourse = deleteCourse;
-exports.upload = upload;
+exports.sectionFileUpload = sectionFileUpload;
+exports.createCourseProfile = createCourseProfile;

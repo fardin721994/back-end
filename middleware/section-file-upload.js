@@ -10,18 +10,18 @@ const MIME_TYPE_MAP = {
   "video/mp4": "mp4",
 };
 
-const fileUpload = multer({
+const sectionFileUpload = multer({
   // limits: 500000,
   storage: multer.diskStorage({
     destination: async (req, file, cb) => {
-      const { courseName, sectionNumber, fileType } = req.body;
+      const { courseName, courseSection, fileType } = req.body;
       fs.mkdir(
         path.join(
           __dirname,
           "..",
           "courses-data",
           `${courseName}`,
-          `${sectionNumber}`
+          `${courseSection}`
         ),
         { recursive: true },
         (err) => {
@@ -29,7 +29,7 @@ const fileUpload = multer({
             return console.error(err);
           } else {
             console.log("Directory created successfully!");
-            cb(null, `courses-data/${courseName}/${sectionNumber}`);
+            cb(null, `courses-data/${courseName}/${courseSection}`);
           }
         }
       );
@@ -50,4 +50,4 @@ const fileUpload = multer({
   // },
 });
 
-module.exports = fileUpload;
+module.exports = sectionFileUpload;
