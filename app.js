@@ -96,15 +96,17 @@ app.use((req, res, next) => {
   throw error;
 });
 
+// mongoose
+//   .connect(
+//     `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.kzyi0we.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
+//   )
 mongoose
-  .connect(
-    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.kzyi0we.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
-  )
+  .connect("mongodb://localhost:27017/funguage")
   .then(() => {
     // app.listen(process.env.PORT || 5000);
-    app.listen(5000);
-
-    console.log("connected to port 5000");
+    // app.listen(5000);
+    // console.log("connected to port 5000");
+    app.listen(5000, "localhost", () => console.log("connected to port 5000"));
   })
   .catch((err) => {
     console.log(err);
