@@ -4,12 +4,12 @@ const uniqueValidator = require("mongoose-unique-validator");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-  name: { type: String, required: true },
+  // name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, minlength: 6 },
-  image: { type: String, required: true },
-  places: [{ type: mongoose.Types.ObjectId, required: true, ref: "Place" }],
-  courses: [{ type: mongoose.Types.ObjectId, required: true, ref: "Course" }],
+  // image: { type: String, required: true },
+  // courses: [{ type: mongoose.Types.ObjectId, required: true, ref: "Course" }],
+  courses: { type: Array, required: true, ref: "Course" },
 });
 
 userSchema.plugin(uniqueValidator);

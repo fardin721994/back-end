@@ -1,6 +1,6 @@
 const { validationResult } = require("express-validator");
 // This library helps us with hashing passwords. We don't want passwords to be plain text.
-const { bcrypt } = require("bcryptjs");
+const bcrypt = require("bcryptjs");
 // This library helps us with creating token
 const jwt = require("jsonwebtoken");
 
@@ -31,7 +31,7 @@ const signup = async (req, res, next) => {
       new HttpError("Invalid inputs passed, please check your data.", 422)
     );
   }
-  const { name, email, password } = req.body;
+  const { email, password } = req.body;
 
   let existingUser;
   try {
@@ -53,6 +53,7 @@ const signup = async (req, res, next) => {
   }
   // Let's hash our password
   let hashedPassword;
+
   try {
     hashedPassword = await bcrypt.hash(password, 12);
   } catch (err) {
@@ -65,11 +66,11 @@ const signup = async (req, res, next) => {
   // Let's hash our password
 
   const createdUser = new User({
-    name,
+    // name,
     email,
-    image: "https://live.staticflickr.com/7631/26849088292_36fc52ee90_b.jpg",
+    // image: "https://live.staticflickr.com/7631/26849088292_36fc52ee90_b.jpg",
     password: hashedPassword,
-    places: [],
+    // places: [],
     courses: [],
   });
 
